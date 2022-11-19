@@ -9,6 +9,8 @@ export default function Formulario() {
     const [post_cpf, setPost_cpf] = useState("");
     const [post_matricula, setPost_matricula] = useState("");
 
+    const { token } = useState("");
+
     async function postData() {
         const postData = {
             nome: post_nome,
@@ -23,6 +25,7 @@ export default function Formulario() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    jwtToken: token,
                 },
                 body: JSON.stringify(postData),
             });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Table, Button } from 'reactstrap';
 
 export default function Tabela() {
@@ -9,13 +9,14 @@ export default function Tabela() {
 
     const [users, setUsers] = useState([]);
 
-    useEffect(() => {
-        load();
-    }, []);
+    const { token } = useState("");
 
-    async function load() {
+    const load = useCallback(async () => {
         await fetch(`${baseURL}`, {
             method: 'GET',
+            headers: {
+                jwtToken: token,
+            }
         })
             .then(data => {
                 return data.json();
@@ -26,21 +27,22 @@ export default function Tabela() {
             .catch(err => {
                 console.log(err);
             });
-    }
+    }, [token])
 
-    async function deleteAll() {
-        await fetch(`${baseURL}`, {
-            method: "delete"
-        })
-            .then(res => res.json())
-            .then(res => console.log(res));
-    }
+    useEffect(() => {
+        load().catch(console.error);
+    }, [load]);
 
     async function deleteById() {
-        const id = delete_id.current.value;
+        const id = delete_id.current.innerHTML;
 
         if (id) {
-            await fetch(`${baseURL}/${id}`, { method: "delete" })
+            await fetch(`${baseURL}/${id}`, {
+                method: "delete",
+                headers: {
+                    jwtToken: token,
+                }
+            })
                 .then(res => res.json())
                 .then(res => console.log(res))
         }
@@ -63,7 +65,7 @@ export default function Tabela() {
             <tbody>
                 {users.map(user => (
                     <tr>
-                        <td ref={delete_id}>{user.idpessoa}</td>
+                        <td ref={delete_id}>{user.idPessoa}</td>
                         <td><img src={user.foto} alt="foto" /></td>
                         <td>{user.nome}</td>
                         <td>{user.cpf}</td>
@@ -77,7 +79,6 @@ export default function Tabela() {
                     </tr>
                 ))}
             </tbody>
-            <Button color="danger" size="sm" onClick={deleteAll}>Delete All</Button>
         </Table>
     );
 }
